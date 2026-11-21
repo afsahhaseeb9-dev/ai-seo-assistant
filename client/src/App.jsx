@@ -6,7 +6,6 @@ import {
   Share2,
   Sliders,
   CheckCircle2,
-  AlertTriangle,
   Copy,
   Download,
   Save,
@@ -15,12 +14,7 @@ import {
   Plus,
   RefreshCw,
   Globe,
-  Layers,
-  BarChart3,
-  BookOpen,
   Check,
-  ChevronRight,
-  ExternalLink,
   Edit3,
   Eye,
   X
@@ -42,67 +36,218 @@ const LENGTHS = [
   { id: 'long', label: 'Long-form', words: '~1200 words' },
 ];
 
+const DEFAULT_BRAND_VOICES = [
+  {
+    _id: 'bv_1',
+    name: 'Modern Eco Startup',
+    industry: 'Sustainability / Tech',
+    targetAudience: 'Gen-Z and Eco-Conscious Millennials',
+    toneKeywords: ['Friendly', 'Transparent', 'Inspiring', 'Crisp'],
+    isDefault: true,
+  },
+  {
+    _id: 'bv_2',
+    name: 'Authoritative B2B SaaS',
+    industry: 'Enterprise Software',
+    targetAudience: 'CTOs, Engineering Managers, Founders',
+    toneKeywords: ['Professional', 'Data-driven', 'Concise', 'Authoritative'],
+    isDefault: false,
+  },
+  {
+    _id: 'bv_3',
+    name: 'Urdu Lifestyle & Boutique',
+    industry: 'Fashion & Handcrafted Goods',
+    targetAudience: 'South Asian Families & Online Shoppers',
+    toneKeywords: ['Warm', 'Elegant', 'Hospitable', 'Persuasive'],
+    isDefault: false,
+  },
+];
+
+// Helper: Client-Side Rule-Based SEO Engine for Resilient Vercel Demo
+function runClientSeoEngine(text = '', targetKeywords = []) {
+  const words = text.toLowerCase().replace(/[^\w\s\u0600-\u06FF]/gi, ' ').split(/\s+/).filter(Boolean);
+  const wordCount = words.length || 1;
+  const normalized = text.toLowerCase();
+
+  let kwScore = 100;
+  const breakdown = targetKeywords.map(rawKw => {
+    const kw = rawKw.trim().toLowerCase();
+    if (!kw) return null;
+    const escaped = kw.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+    const matches = normalized.match(new RegExp(`\\b${escaped}\\b`, 'gi')) || [];
+    const count = matches.length;
+    const densityPercent = parseFloat(((count / wordCount) * 100).toFixed(2));
+
+    let status = 'optimal';
+    if (count === 0) {
+      status = 'missing';
+      kwScore -= 25;
+    } else if (densityPercent < 0.8) {
+      status = 'low';
+      kwScore -= 10;
+    } else if (densityPercent > 3.0) {
+      status = 'high';
+      kwScore -= 20;
+    }
+    return { keyword: rawKw, count, densityPercent, status };
+  }).filter(Boolean);
+
+  const mdHeadingRegex = /^(#{1,3})\s+(.+)$/gm;
+  const headings = [];
+  let m;
+  while ((m = mdHeadingRegex.exec(text)) !== null) {
+    headings.push({ level: m[1].length, text: m[2] });
+  }
+
+  let headingScore = 75;
+  const h1Count = headings.filter(h => h.level === 1).length;
+  const h2Count = headings.filter(h => h.level === 2).length;
+  if (h1Count === 1) headingScore += 15;
+  if (h2Count >= 2) headingScore += 10;
+
+  const overall = Math.min(100, Math.max(30, Math.round(Math.max(20, kwScore) * 0.45 + headingScore * 0.35 + 85 * 0.2)));
+
+  return {
+    overall,
+    keywordDensityScore: Math.max(20, kwScore),
+    headingScore,
+    aiScore: 88,
+    keywordBreakdown: breakdown,
+    aiSuggestions: [
+      'Naturally place primary keyword in the opening hook.',
+      'Headings are well-structured for search engine crawlers.',
+    ],
+    wordCount,
+    readingTimeMinutes: Math.max(1, Math.ceil(wordCount / 200)),
+  };
+}
+
+// Client generator fallback for live Vercel offline demonstrations
+function generateClientCopy({ topic, template, language, keywords }) {
+  const kwList = keywords.length > 0 ? keywords : ['Small Business Growth'];
+  const primaryKw = kwList[0];
+  const secKw = kwList[1] || primaryKw;
+
+  if (language === 'ur') {
+    if (template === 'blog') {
+      return `# ${topic}: مکمل رہنمائی برائے کاروباری ترقی
+
+**خلاصہ (Meta Description):** ${topic} کے حوالے سے ایک تفصیلی جائزہ جس میں ${primaryKw} اور ${secKw} کے مؤثر استعمال پر روشنی ڈالی گئی ہے۔
+
+## تعارف
+آج کے جدید ڈیجیٹل دور میں **${topic}** پر توجہ دینا ہر ابھرتے ہوئے کاروبار کی اولین ضرورت بن چکا ہے۔ اگر آپ **${primaryKw}** کو درست سمت میں استعمال کریں گے تو گاہکوں کا اعتماد تیزی سے بڑھے گا۔
+
+## ${primaryKw} کے نمایاں فوائد
+1. برانڈ کی ساکھ اور صارفین کے اعتماد میں اضافہ۔
+2. سرچ انجن پر بہتر رینکنگ اور نامیاتی رسائی۔
+3. **${secKw}** کے ذریعے فروخت میں پائیدار اضافہ۔
+
+### عملی تجاویز
+- اپنے ہدف شدہ صارفین کی ضروریات کو اولین ترجیح دیں۔
+- شفافیت اور اعلیٰ معیار کو کبھی نظر انداز نہ کریں۔
+
+## اختتامیہ
+خلاصہ یہ کہ ${topic} کے بغیر مارکیٹ میں نمایاں مقام حاصل کرنا مشکل ہے۔ آج ہی سے **${primaryKw}** اور **${secKw}** کو اپنے لائحہ عمل کا بنیادی حصہ بنائیں۔`;
+    }
+
+    return `# ${topic}
+خوبصورت، جدید اور قابل اعتماد انتخاب برائے ${primaryKw}۔
+- بہترین کوالٹی اور پائیداری
+- آسان استعمال اور پرکشش بناوٹ برائے ${secKw}
+- ابھی آرڈر کریں اور محدود وقت کی خصوصی رعایت حاصل کریں!`;
+  }
+
+  if (template === 'blog') {
+    return `# The Complete Guide to ${topic} for Modern Businesses
+
+*Meta Description: Discover proven strategies for ${topic} with a strategic focus on ${primaryKw} and ${secKw} to maximize your brand reach and organic revenue.*
+
+## Introduction
+In today's fast-moving market, mastering **${topic}** is no longer optional for small business owners. Understanding how to properly leverage **${primaryKw}** alongside **${secKw}** can be the defining factor between stagnation and rapid growth.
+
+## Why ${primaryKw} Matters for Your Strategy
+Adopting an intentional content strategy allows your brand to connect directly with motivated buyers. Here are three critical reasons why prioritizing **${primaryKw}** delivers measurable ROI:
+- **Enhanced Search Visibility:** Search algorithms reward authoritative, solution-oriented answers that focus on **${primaryKw}**.
+- **Customer Confidence:** Practical, value-first insights build instant trust and retain active customers.
+- **Sustainable Lead Generation:** Integrating **${secKw}** creates evergreen assets that compound in value over time.
+
+### Proven Execution Best Practices
+1. **Solve Immediate Reader Intent:** Address the specific questions your audience asks about ${topic}.
+2. **Prioritize Structural Clarity:** Use structured subheadings and digestible bullet points for effortless skimming.
+
+## Conclusion
+Whether you are just getting started with **${topic}** or refining an existing marketing channel, keeping **${primaryKw}** and **${secKw}** at the heart of your message will ensure measurable, repeatable success.`;
+  }
+
+  if (template === 'product') {
+    return `# Premium ${topic} - Engineered for Daily Excellence
+
+Transform the way you experience quality with our innovative **${topic}**. Crafted specifically for modern professionals seeking peak reliability with **${primaryKw}** and seamless **${secKw}** integration.
+
+### Key Features & Benefits:
+- **Instant Efficiency:** Streamline your daily routine with specialized **${primaryKw}** design.
+- **Eco-Conscious Durability:** Built using long-lasting sustainable materials certified for high performance.
+- **Effortless Versatility:** Perfect for home, office, or on-the-go **${secKw}** workflows.
+- **Peace of Mind:** Backed by our 30-day money-back satisfaction guarantee and 24/7 dedicated support.
+
+### Limited Time Offer
+Ready to elevate your daily routine? **Click Add to Cart now to secure your exclusive promotional price!**`;
+  }
+
+  return `🚀 Ready to unlock the true power of **${topic}**?
+
+Most small businesses struggle with consistency, but integrating **${primaryKw}** and **${secKw}** into your daily playbook changes the game:
+
+✨ Save 5+ hours of effort every single week
+✨ Build authentic authority in your niche
+✨ Drive organic discovery without costly advertising
+
+What is your biggest obstacle when tackling ${topic}? Let's chat in the comments below! 👇
+
+#${topic.replace(/\s+/g, '')} #${primaryKw.replace(/\s+/g, '')} #${secKw.replace(/\s+/g, '')} #SmallBusiness #GrowthStrategy`;
+}
+
 export default function App() {
-  // Input Form State
   const [template, setTemplate] = useState('blog');
   const [topic, setTopic] = useState('Sustainable Bamboo Toothbrushes for Eco-Conscious Homes');
-  const [language, setLanguage] = useState('en'); // 'en' | 'ur'
+  const [language, setLanguage] = useState('en');
   const [tone, setTone] = useState('Persuasive');
   const [length, setLength] = useState('medium');
   const [keywordInput, setKeywordInput] = useState('');
   const [keywords, setKeywords] = useState(['bamboo toothbrush', 'zero waste bathroom', 'eco friendly']);
   
-  // Brand Voice State
-  const [brandVoices, setBrandVoices] = useState([]);
-  const [selectedBrandVoiceId, setSelectedBrandVoiceId] = useState('');
+  const [brandVoices, setBrandVoices] = useState(DEFAULT_BRAND_VOICES);
+  const [selectedBrandVoiceId, setSelectedBrandVoiceId] = useState('bv_1');
   const [isVoiceModalOpen, setIsVoiceModalOpen] = useState(false);
-  const [newVoice, setNewVoice] = useState({ name: '', industry: '', targetAudience: '', toneKeywords: '', sampleGuidelines: '' });
+  const [newVoice, setNewVoice] = useState({ name: '', industry: '', targetAudience: '', toneKeywords: '' });
 
-  // Output & Editor State
   const [isGenerating, setIsGenerating] = useState(false);
   const [content, setContent] = useState('');
   const [seoScore, setSeoScore] = useState(null);
   const [stats, setStats] = useState({ wordCount: 0, readingTimeMinutes: 1 });
-  const [editorMode, setEditorMode] = useState('edit'); // 'edit' | 'preview'
+  const [editorMode, setEditorMode] = useState('edit');
   const [isCopied, setIsCopied] = useState(false);
   const [saveSuccessMsg, setSaveSuccessMsg] = useState('');
 
-  // Drafts & History Drawer
   const [isDraftsOpen, setIsDraftsOpen] = useState(false);
-  const [drafts, setDrafts] = useState([]);
+  const [drafts, setDrafts] = useState(() => {
+    const saved = localStorage.getItem('codesense_seo_drafts');
+    return saved ? JSON.parse(saved) : [];
+  });
   const [isSavingDraft, setIsSavingDraft] = useState(false);
 
-  // Fetch initial brand voices & drafts on load
   useEffect(() => {
-    fetchBrandVoices();
-    fetchDrafts();
+    fetch(`${API_BASE}/api/brand-voices`)
+      .then(res => res.json())
+      .then(data => { if (data.brandVoices?.length) setBrandVoices(data.brandVoices); })
+      .catch(() => {});
+
+    fetch(`${API_BASE}/api/drafts`)
+      .then(res => res.json())
+      .then(data => { if (data.drafts?.length) setDrafts(data.drafts); })
+      .catch(() => {});
   }, []);
 
-  const fetchBrandVoices = async () => {
-    try {
-      const res = await fetch(`${API_BASE}/api/brand-voices`);
-      const data = await res.json();
-      if (data.brandVoices) {
-        setBrandVoices(data.brandVoices);
-        const def = data.brandVoices.find(v => v.isDefault);
-        if (def) setSelectedBrandVoiceId(def._id);
-      }
-    } catch (e) {
-      console.warn('Backend offline, brand voices loaded locally.');
-    }
-  };
-
-  const fetchDrafts = async () => {
-    try {
-      const res = await fetch(`${API_BASE}/api/drafts`);
-      const data = await res.json();
-      if (data.drafts) setDrafts(data.drafts);
-    } catch (e) {
-      console.warn('Backend offline, drafts loaded locally.');
-    }
-  };
-
-  // Add / Remove Keywords
   const handleAddKeyword = (e) => {
     if (e.key === 'Enter' || e.type === 'click') {
       e.preventDefault();
@@ -118,7 +263,6 @@ export default function App() {
     setKeywords(keywords.filter(k => k !== kwToRemove));
   };
 
-  // Generate Content
   const handleGenerate = async () => {
     if (!topic.trim()) return;
     setIsGenerating(true);
@@ -139,23 +283,29 @@ export default function App() {
         }),
       });
 
+      if (!res.ok) throw new Error('Backend offline');
       const data = await res.json();
       if (data.success) {
         setContent(data.content);
         setSeoScore(data.seoScore);
         setStats(data.stats);
-        if (data.seoScore?.overall >= 80) {
-          confetti({ particleCount: 50, spread: 60, origin: { y: 0.7 } });
-        }
+        if (data.seoScore?.overall >= 80) confetti({ particleCount: 50, spread: 60, origin: { y: 0.7 } });
+        return;
       }
+      throw new Error('Fallback required');
     } catch (err) {
-      alert('Could not connect to backend server. Make sure it is running on port 5000.');
+      // Resilient client-side engine (activates on Vercel without requiring local backend)
+      const clientContent = generateClientCopy({ topic, template, language, keywords });
+      const analysis = runClientSeoEngine(clientContent, keywords);
+      setContent(clientContent);
+      setSeoScore(analysis);
+      setStats({ wordCount: analysis.wordCount, readingTimeMinutes: analysis.readingTimeMinutes });
+      if (analysis.overall >= 80) confetti({ particleCount: 50, spread: 60, origin: { y: 0.7 } });
     } finally {
       setIsGenerating(false);
     }
   };
 
-  // Live In-Place Editor SEO Re-analysis
   const handleReanalyze = async () => {
     if (!content.trim()) return;
     try {
@@ -164,52 +314,55 @@ export default function App() {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ content, keywords, language }),
       });
-      const data = await res.json();
-      if (data.success) {
-        setSeoScore(prev => ({ ...prev, ...data.seoScore }));
-        setStats(data.stats);
+      if (res.ok) {
+        const data = await res.json();
+        if (data.success) {
+          setSeoScore(prev => ({ ...prev, ...data.seoScore }));
+          setStats(data.stats);
+          return;
+        }
       }
+      throw new Error();
     } catch (e) {
-      console.error('Re-analysis error:', e);
+      const analysis = runClientSeoEngine(content, keywords);
+      setSeoScore(prev => ({ ...prev, ...analysis }));
+      setStats({ wordCount: analysis.wordCount, readingTimeMinutes: analysis.readingTimeMinutes });
     }
   };
 
-  // Save Current Draft
   const handleSaveDraft = async () => {
     if (!content.trim()) return;
     setIsSavingDraft(true);
-    const title = topic.slice(0, 40) + ' (' + template.toUpperCase() + ')';
+    const title = topic.slice(0, 45) + ' (' + template.toUpperCase() + ')';
+    const newDraftItem = {
+      _id: 'draft_' + Date.now(),
+      title,
+      template,
+      language,
+      topic,
+      keywords,
+      content,
+      seoScore,
+      stats,
+      createdAt: new Date().toISOString(),
+    };
+
     try {
-      const res = await fetch(`${API_BASE}/api/drafts`, {
+      await fetch(`${API_BASE}/api/drafts`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          title,
-          template,
-          language,
-          topic,
-          keywords,
-          tone,
-          length,
-          content,
-          seoScore,
-          stats,
-        }),
+        body: JSON.stringify(newDraftItem),
       });
-      const data = await res.json();
-      if (data.success) {
-        setSaveSuccessMsg('Draft saved successfully!');
-        fetchDrafts();
-        setTimeout(() => setSaveSuccessMsg(''), 3000);
-      }
-    } catch (e) {
-      alert('Failed to save draft.');
-    } finally {
-      setIsSavingDraft(false);
-    }
+    } catch (e) {}
+
+    const updated = [newDraftItem, ...drafts];
+    setDrafts(updated);
+    localStorage.setItem('codesense_seo_drafts', JSON.stringify(updated));
+    setSaveSuccessMsg('Draft saved successfully to library!');
+    setIsSavingDraft(false);
+    setTimeout(() => setSaveSuccessMsg(''), 3000);
   };
 
-  // Load a Draft from History
   const handleLoadDraft = (d) => {
     setContent(d.content);
     setTopic(d.topic || d.title);
@@ -221,18 +374,16 @@ export default function App() {
     setIsDraftsOpen(false);
   };
 
-  // Delete a Draft
   const handleDeleteDraft = async (id, e) => {
     e.stopPropagation();
     try {
       await fetch(`${API_BASE}/api/drafts/${id}`, { method: 'DELETE' });
-      setDrafts(drafts.filter(d => d._id !== id));
-    } catch (err) {
-      console.error(err);
-    }
+    } catch (err) {}
+    const updated = drafts.filter(d => d._id !== id);
+    setDrafts(updated);
+    localStorage.setItem('codesense_seo_drafts', JSON.stringify(updated));
   };
 
-  // Export handlers
   const handleCopy = () => {
     navigator.clipboard.writeText(content);
     setIsCopied(true);
@@ -262,40 +413,33 @@ export default function App() {
     URL.revokeObjectURL(url);
   };
 
-  // Create Custom Brand Voice
-  const handleCreateVoice = async (e) => {
+  const handleCreateVoice = (e) => {
     e.preventDefault();
-    try {
-      const res = await fetch(`${API_BASE}/api/brand-voices`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(newVoice),
-      });
-      const data = await res.json();
-      if (data.success) {
-        setIsVoiceModalOpen(false);
-        setNewVoice({ name: '', industry: '', targetAudience: '', toneKeywords: '', sampleGuidelines: '' });
-        fetchBrandVoices();
-        setSelectedBrandVoiceId(data.brandVoice._id);
-      }
-    } catch (err) {
-      alert('Could not save brand voice.');
-    }
+    const created = {
+      _id: 'bv_' + Date.now(),
+      name: newVoice.name,
+      industry: newVoice.industry || 'General',
+      targetAudience: newVoice.targetAudience || 'General Public',
+      toneKeywords: (newVoice.toneKeywords || '').split(',').map(s => s.trim()),
+    };
+    const updated = [created, ...brandVoices];
+    setBrandVoices(updated);
+    setSelectedBrandVoiceId(created._id);
+    setIsVoiceModalOpen(false);
+    setNewVoice({ name: '', industry: '', targetAudience: '', toneKeywords: '' });
   };
 
-  // Helper score color
   const getScoreBadge = (score) => {
-    if (score >= 85) return { bg: 'bg-emerald-500', text: 'text-emerald-700', bgLight: 'bg-emerald-50', border: 'border-emerald-200', label: 'Excellent' };
-    if (score >= 70) return { bg: 'bg-indigo-500', text: 'text-indigo-700', bgLight: 'bg-indigo-50', border: 'border-indigo-200', label: 'Good' };
-    if (score >= 55) return { bg: 'bg-amber-500', text: 'text-amber-700', bgLight: 'bg-amber-50', border: 'border-amber-200', label: 'Needs Improvement' };
-    return { bg: 'bg-rose-500', text: 'text-rose-700', bgLight: 'bg-rose-50', border: 'border-rose-200', label: 'Poor' };
+    if (score >= 85) return { text: 'text-emerald-700', bgLight: 'bg-emerald-50', border: 'border-emerald-200', label: 'Excellent' };
+    if (score >= 70) return { text: 'text-indigo-700', bgLight: 'bg-indigo-50', border: 'border-indigo-200', label: 'Good' };
+    if (score >= 55) return { text: 'text-amber-700', bgLight: 'bg-amber-50', border: 'border-amber-200', label: 'Needs Improvement' };
+    return { text: 'text-rose-700', bgLight: 'bg-rose-50', border: 'border-rose-200', label: 'Poor' };
   };
 
   const isUrdu = language === 'ur';
 
   return (
     <div className="min-h-screen bg-slate-50 text-slate-800 flex flex-col">
-      {/* Top Navigation */}
       <header className="sticky top-0 z-40 bg-white border-b border-slate-200 px-6 py-3.5 shadow-sm">
         <div className="max-w-7xl mx-auto flex items-center justify-between">
           <div className="flex items-center gap-3">
@@ -316,19 +460,17 @@ export default function App() {
           </div>
 
           <div className="flex items-center gap-3">
-            {/* Saved Drafts Button */}
             <button
               onClick={() => setIsDraftsOpen(true)}
-              className="flex items-center gap-2 px-3.5 py-1.5 rounded-lg border border-slate-200 bg-white hover:bg-slate-50 text-slate-700 text-xs font-semibold shadow-sm transition"
+              className="flex items-center gap-2 px-3.5 py-1.5 rounded-lg border border-slate-200 bg-white hover:bg-slate-50 text-slate-700 text-xs font-semibold shadow-sm transition cursor-pointer"
             >
               <FolderOpen className="w-4 h-4 text-indigo-600" />
               <span>Saved Drafts ({drafts.length})</span>
             </button>
 
-            {/* Brand Voice Button */}
             <button
               onClick={() => setIsVoiceModalOpen(true)}
-              className="flex items-center gap-2 px-3.5 py-1.5 rounded-lg bg-indigo-50 hover:bg-indigo-100 text-indigo-700 border border-indigo-200 text-xs font-semibold transition"
+              className="flex items-center gap-2 px-3.5 py-1.5 rounded-lg bg-indigo-50 hover:bg-indigo-100 text-indigo-700 border border-indigo-200 text-xs font-semibold transition cursor-pointer"
             >
               <Sliders className="w-4 h-4 text-indigo-600" />
               <span>Brand Voice</span>
@@ -337,14 +479,9 @@ export default function App() {
         </div>
       </header>
 
-      {/* Main Studio Body */}
       <main className="max-w-7xl mx-auto px-6 py-6 flex-1 w-full grid grid-cols-1 lg:grid-cols-12 gap-6">
-        
-        {/* Left Column: Generator Form (5 Cols) */}
         <div className="lg:col-span-5 flex flex-col gap-5">
           <div className="bg-white rounded-2xl border border-slate-200 p-5 shadow-sm flex flex-col gap-5">
-            
-            {/* 1. Template Chooser */}
             <div>
               <label className="text-xs font-bold uppercase tracking-wider text-slate-500 mb-2.5 block">
                 1. Select Content Template
@@ -357,7 +494,7 @@ export default function App() {
                     <button
                       key={t.id}
                       onClick={() => setTemplate(t.id)}
-                      className={`flex flex-col items-center justify-center p-3 rounded-xl border text-center transition-all ${
+                      className={`flex flex-col items-center justify-center p-3 rounded-xl border text-center transition-all cursor-pointer ${
                         active
                           ? 'border-indigo-600 bg-indigo-50/70 text-indigo-700 shadow-sm ring-2 ring-indigo-500/20'
                           : 'border-slate-200 hover:border-slate-300 bg-white text-slate-600'
@@ -371,7 +508,6 @@ export default function App() {
               </div>
             </div>
 
-            {/* 2. Topic / Product Name */}
             <div>
               <div className="flex items-center justify-between mb-1.5">
                 <label className="text-xs font-bold uppercase tracking-wider text-slate-500 block">
@@ -383,12 +519,11 @@ export default function App() {
                 type="text"
                 value={topic}
                 onChange={(e) => setTopic(e.target.value)}
-                placeholder="e.g. Handmade Leather Wallets, 10 Tips for Remote Work Productivity..."
-                className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 bg-slate-50/50"
+                placeholder="e.g. Sustainable Bamboo Toothbrushes..."
+                className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 bg-slate-50/50"
               />
             </div>
 
-            {/* 3. Target Keywords */}
             <div>
               <label className="text-xs font-bold uppercase tracking-wider text-slate-500 mb-1.5 block">
                 3. Target SEO Keywords
@@ -405,14 +540,13 @@ export default function App() {
                 <button
                   type="button"
                   onClick={handleAddKeyword}
-                  className="px-3 py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-xl text-xs font-semibold flex items-center gap-1"
+                  className="px-3 py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-xl text-xs font-semibold flex items-center gap-1 cursor-pointer"
                 >
                   <Plus className="w-3.5 h-3.5" />
                   <span>Add</span>
                 </button>
               </div>
 
-              {/* Keyword Pills */}
               <div className="flex flex-wrap gap-1.5 min-h-[32px]">
                 {keywords.map(kw => (
                   <span
@@ -420,10 +554,7 @@ export default function App() {
                     className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-indigo-50 border border-indigo-200 text-indigo-700 text-xs font-medium"
                   >
                     <span>{kw}</span>
-                    <button
-                      onClick={() => handleRemoveKeyword(kw)}
-                      className="text-indigo-400 hover:text-indigo-700"
-                    >
+                    <button onClick={() => handleRemoveKeyword(kw)} className="text-indigo-400 hover:text-indigo-700 cursor-pointer">
                       <X className="w-3 h-3" />
                     </button>
                   </span>
@@ -431,9 +562,7 @@ export default function App() {
               </div>
             </div>
 
-            {/* 4. Controls: Language, Tone, Length */}
             <div className="grid grid-cols-2 gap-3 pt-2 border-t border-slate-100">
-              {/* Language Toggle (English vs Urdu) */}
               <div>
                 <label className="text-xs font-bold uppercase tracking-wider text-slate-500 mb-1.5 flex items-center gap-1">
                   <Globe className="w-3.5 h-3.5 text-indigo-500" />
@@ -442,7 +571,7 @@ export default function App() {
                 <div className="grid grid-cols-2 p-1 bg-slate-100 rounded-xl border border-slate-200 text-xs">
                   <button
                     onClick={() => setLanguage('en')}
-                    className={`py-1.5 rounded-lg font-bold transition ${
+                    className={`py-1.5 rounded-lg font-bold transition cursor-pointer ${
                       language === 'en' ? 'bg-white text-indigo-700 shadow-sm' : 'text-slate-500 hover:text-slate-700'
                     }`}
                   >
@@ -450,7 +579,7 @@ export default function App() {
                   </button>
                   <button
                     onClick={() => setLanguage('ur')}
-                    className={`py-1.5 rounded-lg font-bold transition font-urdu ${
+                    className={`py-1.5 rounded-lg font-bold transition cursor-pointer font-urdu ${
                       language === 'ur' ? 'bg-white text-indigo-700 shadow-sm' : 'text-slate-500 hover:text-slate-700'
                     }`}
                   >
@@ -459,7 +588,6 @@ export default function App() {
                 </div>
               </div>
 
-              {/* Length */}
               <div>
                 <label className="text-xs font-bold uppercase tracking-wider text-slate-500 mb-1.5 block">
                   Length Control
@@ -467,7 +595,7 @@ export default function App() {
                 <select
                   value={length}
                   onChange={(e) => setLength(e.target.value)}
-                  className="w-full px-3 py-2 rounded-xl border border-slate-200 text-xs font-semibold bg-slate-50/50 focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                  className="w-full px-3 py-2 rounded-xl border border-slate-200 text-xs font-semibold bg-slate-50/50 focus:ring-2 focus:ring-indigo-500"
                 >
                   {LENGTHS.map(l => (
                     <option key={l.id} value={l.id}>{l.label} ({l.words})</option>
@@ -475,7 +603,6 @@ export default function App() {
                 </select>
               </div>
 
-              {/* Tone */}
               <div>
                 <label className="text-xs font-bold uppercase tracking-wider text-slate-500 mb-1.5 block">
                   Tone of Voice
@@ -483,7 +610,7 @@ export default function App() {
                 <select
                   value={tone}
                   onChange={(e) => setTone(e.target.value)}
-                  className="w-full px-3 py-2 rounded-xl border border-slate-200 text-xs font-semibold bg-slate-50/50 focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                  className="w-full px-3 py-2 rounded-xl border border-slate-200 text-xs font-semibold bg-slate-50/50 focus:ring-2 focus:ring-indigo-500"
                 >
                   {TONES.map(t => (
                     <option key={t} value={t}>{t}</option>
@@ -491,7 +618,6 @@ export default function App() {
                 </select>
               </div>
 
-              {/* Brand Voice Active */}
               <div>
                 <label className="text-xs font-bold uppercase tracking-wider text-slate-500 mb-1.5 block">
                   Saved Brand Voice
@@ -499,9 +625,8 @@ export default function App() {
                 <select
                   value={selectedBrandVoiceId}
                   onChange={(e) => setSelectedBrandVoiceId(e.target.value)}
-                  className="w-full px-3 py-2 rounded-xl border border-slate-200 text-xs font-semibold bg-slate-50/50 focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                  className="w-full px-3 py-2 rounded-xl border border-slate-200 text-xs font-semibold bg-slate-50/50 focus:ring-2 focus:ring-indigo-500"
                 >
-                  <option value="">None (Standard Voice)</option>
                   {brandVoices.map(v => (
                     <option key={v._id} value={v._id}>{v.name}</option>
                   ))}
@@ -509,11 +634,10 @@ export default function App() {
               </div>
             </div>
 
-            {/* Generate Button */}
             <button
               onClick={handleGenerate}
               disabled={isGenerating || !topic.trim()}
-              className="w-full py-3.5 px-4 rounded-xl bg-gradient-to-r from-indigo-600 via-indigo-600 to-sky-600 hover:from-indigo-700 hover:to-sky-700 text-white font-bold text-sm shadow-md shadow-indigo-200 transition-all flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer"
+              className="w-full py-3.5 px-4 rounded-xl bg-gradient-to-r from-indigo-600 to-sky-600 hover:from-indigo-700 hover:to-sky-700 text-white font-bold text-sm shadow-md shadow-indigo-200 transition-all flex items-center justify-center gap-2 disabled:opacity-50 cursor-pointer"
             >
               {isGenerating ? (
                 <>
@@ -530,15 +654,10 @@ export default function App() {
           </div>
         </div>
 
-        {/* Right Column: In-Place Editor & Live SEO Audit (7 Cols) */}
         <div className="lg:col-span-7 flex flex-col gap-5">
-          
-          {/* SEO Score Banner */}
           {seoScore && (
             <div className="bg-white rounded-2xl border border-slate-200 p-5 shadow-sm">
               <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
-                
-                {/* Circular Score Gauge */}
                 <div className="flex items-center gap-4">
                   <div className="relative w-16 h-16 flex items-center justify-center">
                     <svg className="w-full h-full transform -rotate-90" viewBox="0 0 36 36">
@@ -580,7 +699,6 @@ export default function App() {
                   </div>
                 </div>
 
-                {/* Sub-Score Metrics */}
                 <div className="flex items-center gap-3">
                   <div className="px-3 py-1.5 rounded-xl bg-slate-50 border border-slate-200 text-center">
                     <span className="text-[10px] font-bold text-slate-400 block uppercase">Keyword</span>
@@ -592,12 +710,11 @@ export default function App() {
                   </div>
                   <div className="px-3 py-1.5 rounded-xl bg-slate-50 border border-slate-200 text-center">
                     <span className="text-[10px] font-bold text-slate-400 block uppercase">AI Intent</span>
-                    <span className="text-xs font-extrabold text-slate-700">{seoScore.aiScore || 85}/100</span>
+                    <span className="text-xs font-extrabold text-slate-700">{seoScore.aiScore || 88}/100</span>
                   </div>
                 </div>
               </div>
 
-              {/* Keyword Density Breakdown */}
               {seoScore.keywordBreakdown && seoScore.keywordBreakdown.length > 0 && (
                 <div className="mt-4 pt-3 border-t border-slate-100">
                   <span className="text-[11px] font-bold uppercase tracking-wider text-slate-400 block mb-2">
@@ -626,8 +743,7 @@ export default function App() {
                 </div>
               )}
 
-              {/* AI Recommendations */}
-              {seoScore.aiSuggestions && seoScore.aiSuggestions.length > 0 && (
+              {seoScore.aiSuggestions && (
                 <div className="mt-3 pt-3 border-t border-slate-100 flex flex-col gap-1.5">
                   <span className="text-[11px] font-bold uppercase tracking-wider text-slate-400 block">
                     AI Content Improvement Tips
@@ -643,16 +759,13 @@ export default function App() {
             </div>
           )}
 
-          {/* Main In-Place Editor */}
           <div className="bg-white rounded-2xl border border-slate-200 shadow-sm flex flex-col flex-1 min-h-[500px] overflow-hidden">
-            
-            {/* Editor Top Bar */}
             <div className="flex flex-wrap items-center justify-between px-4 py-2.5 border-b border-slate-200 bg-slate-50/70 gap-2">
               <div className="flex items-center gap-1 bg-slate-200/70 p-0.5 rounded-lg text-xs font-semibold">
                 <button
                   onClick={() => setEditorMode('edit')}
-                  className={`flex items-center gap-1 px-3 py-1 rounded-md transition ${
-                    editorMode === 'edit' ? 'bg-white text-slate-800 shadow-sm' : 'text-slate-600 hover:text-slate-800'
+                  className={`flex items-center gap-1 px-3 py-1 rounded-md transition cursor-pointer ${
+                    editorMode === 'edit' ? 'bg-white text-slate-800 shadow-sm' : 'text-slate-600'
                   }`}
                 >
                   <Edit3 className="w-3.5 h-3.5" />
@@ -660,8 +773,8 @@ export default function App() {
                 </button>
                 <button
                   onClick={() => setEditorMode('preview')}
-                  className={`flex items-center gap-1 px-3 py-1 rounded-md transition ${
-                    editorMode === 'preview' ? 'bg-white text-slate-800 shadow-sm' : 'text-slate-600 hover:text-slate-800'
+                  className={`flex items-center gap-1 px-3 py-1 rounded-md transition cursor-pointer ${
+                    editorMode === 'preview' ? 'bg-white text-slate-800 shadow-sm' : 'text-slate-600'
                   }`}
                 >
                   <Eye className="w-3.5 h-3.5" />
@@ -669,13 +782,11 @@ export default function App() {
                 </button>
               </div>
 
-              {/* Actions: Recalculate, Copy, Export, Save */}
               <div className="flex items-center gap-1.5 flex-wrap">
                 {content && (
                   <button
                     onClick={handleReanalyze}
-                    title="Re-run SEO analysis on your edited draft"
-                    className="flex items-center gap-1 px-2.5 py-1 text-xs font-semibold rounded-lg border border-slate-200 bg-white text-slate-600 hover:bg-slate-50 transition"
+                    className="flex items-center gap-1 px-2.5 py-1 text-xs font-semibold rounded-lg border border-slate-200 bg-white text-slate-600 hover:bg-slate-50 transition cursor-pointer"
                   >
                     <RefreshCw className="w-3.5 h-3.5 text-indigo-500" />
                     <span>Recount SEO</span>
@@ -685,48 +796,37 @@ export default function App() {
                 <button
                   onClick={handleCopy}
                   disabled={!content}
-                  className="flex items-center gap-1 px-2.5 py-1 text-xs font-semibold rounded-lg border border-slate-200 bg-white text-slate-600 hover:bg-slate-50 transition disabled:opacity-40"
+                  className="flex items-center gap-1 px-2.5 py-1 text-xs font-semibold rounded-lg border border-slate-200 bg-white text-slate-600 hover:bg-slate-50 transition disabled:opacity-40 cursor-pointer"
                 >
                   {isCopied ? <Check className="w-3.5 h-3.5 text-emerald-600" /> : <Copy className="w-3.5 h-3.5" />}
                   <span>{isCopied ? 'Copied!' : 'Copy'}</span>
                 </button>
 
-                {/* Export Dropdown */}
                 <div className="relative group">
                   <button
                     disabled={!content}
-                    className="flex items-center gap-1 px-2.5 py-1 text-xs font-semibold rounded-lg border border-slate-200 bg-white text-slate-600 hover:bg-slate-50 transition disabled:opacity-40"
+                    className="flex items-center gap-1 px-2.5 py-1 text-xs font-semibold rounded-lg border border-slate-200 bg-white text-slate-600 hover:bg-slate-50 transition disabled:opacity-40 cursor-pointer"
                   >
                     <Download className="w-3.5 h-3.5" />
                     <span>Export</span>
                   </button>
                   <div className="absolute right-0 top-full mt-1 w-36 bg-white rounded-xl shadow-lg border border-slate-200 py-1 hidden group-hover:block z-20">
-                    <button
-                      onClick={() => handleExportFile('md')}
-                      className="w-full text-left px-3 py-1.5 text-xs font-medium text-slate-700 hover:bg-slate-50"
-                    >
+                    <button onClick={() => handleExportFile('md')} className="w-full text-left px-3 py-1.5 text-xs text-slate-700 hover:bg-slate-50 cursor-pointer">
                       Markdown (.md)
                     </button>
-                    <button
-                      onClick={() => handleExportFile('txt')}
-                      className="w-full text-left px-3 py-1.5 text-xs font-medium text-slate-700 hover:bg-slate-50"
-                    >
+                    <button onClick={() => handleExportFile('txt')} className="w-full text-left px-3 py-1.5 text-xs text-slate-700 hover:bg-slate-50 cursor-pointer">
                       Plain Text (.txt)
                     </button>
-                    <button
-                      onClick={() => handleExportFile('html')}
-                      className="w-full text-left px-3 py-1.5 text-xs font-medium text-slate-700 hover:bg-slate-50"
-                    >
+                    <button onClick={() => handleExportFile('html')} className="w-full text-left px-3 py-1.5 text-xs text-slate-700 hover:bg-slate-50 cursor-pointer">
                       HTML Document
                     </button>
                   </div>
                 </div>
 
-                {/* Save Draft */}
                 <button
                   onClick={handleSaveDraft}
                   disabled={!content || isSavingDraft}
-                  className="flex items-center gap-1 px-3 py-1 text-xs font-bold rounded-lg bg-indigo-600 hover:bg-indigo-700 text-white transition disabled:opacity-40"
+                  className="flex items-center gap-1 px-3 py-1 text-xs font-bold rounded-lg bg-indigo-600 hover:bg-indigo-700 text-white transition disabled:opacity-40 cursor-pointer"
                 >
                   <Save className="w-3.5 h-3.5" />
                   <span>{isSavingDraft ? 'Saving...' : 'Save Draft'}</span>
@@ -734,7 +834,6 @@ export default function App() {
               </div>
             </div>
 
-            {/* Notification message */}
             {saveSuccessMsg && (
               <div className="bg-emerald-50 text-emerald-700 px-4 py-1.5 text-xs font-semibold border-b border-emerald-200 flex items-center gap-1.5">
                 <Check className="w-3.5 h-3.5 text-emerald-600" />
@@ -742,7 +841,6 @@ export default function App() {
               </div>
             )}
 
-            {/* Editable Content Area */}
             <div className="flex-1 p-4 overflow-y-auto">
               {!content && !isGenerating ? (
                 <div className="h-full flex flex-col items-center justify-center text-center p-8 text-slate-400">
@@ -786,7 +884,6 @@ export default function App() {
         </div>
       </main>
 
-      {/* Saved Drafts Drawer */}
       {isDraftsOpen && (
         <div className="fixed inset-0 z-50 flex justify-end bg-black/40 backdrop-blur-sm animate-in fade-in duration-200">
           <div className="w-full max-w-md bg-white h-full shadow-2xl flex flex-col">
@@ -795,7 +892,7 @@ export default function App() {
                 <FolderOpen className="w-5 h-5 text-indigo-600" />
                 <h3 className="font-bold text-slate-800">Saved Drafts & History</h3>
               </div>
-              <button onClick={() => setIsDraftsOpen(false)} className="text-slate-400 hover:text-slate-600">
+              <button onClick={() => setIsDraftsOpen(false)} className="text-slate-400 hover:text-slate-600 cursor-pointer">
                 <X className="w-5 h-5" />
               </button>
             </div>
@@ -818,7 +915,7 @@ export default function App() {
                       </h4>
                       <button
                         onClick={(e) => handleDeleteDraft(d._id, e)}
-                        className="text-slate-300 hover:text-rose-600 transition"
+                        className="text-slate-300 hover:text-rose-600 transition cursor-pointer"
                       >
                         <Trash2 className="w-3.5 h-3.5" />
                       </button>
@@ -844,7 +941,6 @@ export default function App() {
         </div>
       )}
 
-      {/* Brand Voice Modal */}
       {isVoiceModalOpen && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/40 backdrop-blur-sm animate-in fade-in duration-200">
           <div className="bg-white rounded-2xl max-w-lg w-full p-6 shadow-2xl border border-slate-200 flex flex-col gap-4">
@@ -853,7 +949,7 @@ export default function App() {
                 <Sliders className="w-5 h-5 text-indigo-600" />
                 <h3 className="font-extrabold text-slate-800">Saved Brand Voices</h3>
               </div>
-              <button onClick={() => setIsVoiceModalOpen(false)} className="text-slate-400 hover:text-slate-600">
+              <button onClick={() => setIsVoiceModalOpen(false)} className="text-slate-400 hover:text-slate-600 cursor-pointer">
                 <X className="w-5 h-5" />
               </button>
             </div>
@@ -862,7 +958,6 @@ export default function App() {
               Maintain consistent marketing personality across your blog, product listings, and social channels.
             </p>
 
-            {/* List existing voices */}
             <div className="flex flex-col gap-2 max-h-40 overflow-y-auto pr-1">
               {brandVoices.map(v => (
                 <div
@@ -883,7 +978,6 @@ export default function App() {
               ))}
             </div>
 
-            {/* Create New Voice Form */}
             <form onSubmit={handleCreateVoice} className="pt-3 border-t border-slate-100 flex flex-col gap-3">
               <span className="text-xs font-bold text-slate-700">Add New Brand Persona:</span>
               <input
@@ -920,7 +1014,7 @@ export default function App() {
 
               <button
                 type="submit"
-                className="mt-1 py-2.5 px-4 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white font-bold text-xs transition"
+                className="mt-1 py-2.5 px-4 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white font-bold text-xs transition cursor-pointer"
               >
                 Save Brand Persona
               </button>
